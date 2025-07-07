@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -39,5 +40,11 @@ public class TransaocaoController  {
         if (ultima == null)
             return ResponseEntity.noContent().build();
         return ResponseEntity.ok(ultima);
+    }
+
+       @DeleteMapping
+    public ResponseEntity<?> limparTransacoes() {
+        transacaoService.limpar();
+        return ResponseEntity.ok().build();
     }
 }
