@@ -1,6 +1,7 @@
 package com.example.sofia.Transacoes;
 
 import java.time.ZonedDateTime;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -46,5 +47,12 @@ public class TransaocaoController  {
     public ResponseEntity<?> limparTransacoes() {
         transacaoService.limpar();
         return ResponseEntity.ok().build();
+
+    }
+
+    @GetMapping("/estatisca")
+    public ResponseEntity<?> calcularEstatisca() {
+        List<Transacao> results = transacaoService.ultimos60Segundos();
+        return ResponseEntity.ok(results);
     }
 }

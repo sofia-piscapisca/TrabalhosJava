@@ -26,6 +26,7 @@ public class TransacaoService {
         return transacoes.get(transacoes.size() - 1);
     }
 
+    //Retorna as estatísticas das transações ocorridas nos últimos 60 segundos.
     public List<Transacao> ultimos60Segundos() {
         ZonedDateTime agora = ZonedDateTime.now();
         return transacoes.stream()
@@ -42,5 +43,8 @@ public class TransacaoService {
     public void excluirPeriodo(ZonedDateTime inicio, ZonedDateTime fim) {
         transacoes.removeIf(t -> !t.getDataHora().isBefore(inicio) && !t.getDataHora().isAfter(fim));
     }
+
+    
+     
 }
 
