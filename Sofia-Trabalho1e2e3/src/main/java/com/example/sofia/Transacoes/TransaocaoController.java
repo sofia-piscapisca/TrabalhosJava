@@ -1,7 +1,10 @@
 package com.example.sofia.Transacoes;
 
 import java.time.ZonedDateTime;
+import java.util.DoubleSummaryStatistics;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -53,21 +56,73 @@ public class TransaocaoController {
     }
 
     @GetMapping("/estatisca")
-    public ResponseEntity<?> calcularEstatisca() {
+    public ResponseEntity<Map<String, Object>> calcularEstatisca() {
         List<Transacao> results = transacaoService.ultimos60Segundos();
-        return ResponseEntity.ok(results);
+
+        Map<String, Object> estatisticas = new HashMap<>();
+
+        if (results.isEmpty()) {
+            estatisticas.put("count", 0);
+            estatisticas.put("sum", 0.0);
+            estatisticas.put("avg", 0.0);
+            estatisticas.put("min", 0.0);
+            estatisticas.put("max", 0.0);
+            return ResponseEntity.ok(estatisticas);
+        }
+
+        DoubleSummaryStatistics stats = results.stream()
+                .mapToDouble(t -> t.getValor())
+                .summaryStatistics();
+
+        estatisticas.put("count", stats.getCount());
+        estatisticas.put("sum", stats.getSum());
+        estatisticas.put("avg", stats.getAverage());
+        estatisticas.put("min", stats.getMin());
+        estatisticas.put("max", stats.getMax());
+
+        return ResponseEntity.ok(estatisticas);
     }
 
     @PostMapping("/periodo")
-    public ResponseEntity<?> consultarPeriodo(@RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime inicio, @RequestParam("fim") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime fim ) {
-        List<Transacao> results = transacaoService.porPeriodo(inicio, fim);
-        return ResponseEntity.ok(results);
+    public ResponseEntity<?> consultarPeriodo(
+        @RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime inicio,
+        @RequestParam("fim") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime fim) {
 
+        List<Transacao> results = transacaoService.porPeriodo(inicio, fim);
+
+        if (results.isEmpty()) {
+            Map<String, Object> emptyStats = new HashMap<>();
+            emptyStats.put("count", 0);
+            emptyStats.put("sum", 0.0);
+            emptyStats.put("avg", 0.0);
+            emptyStats.put("min", 0.0);
+            emptyStats.put("max", 0.0);
+            return ResponseEntity.ok(emptyStats);
+        }
+
+        DoubleSummaryStatistics stats = results.stream()
+            .mapToDouble(Transacao::getValor) 
+            .summaryStatistics();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("count", stats.getCount());
+        response.put("sum", stats.getSum());
+        response.put("avg", stats.getAverage());
+        response.put("min", stats.getMin());
+        response.put("max", stats.getMax());
+
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/periodo")
-        public ResponseEntity<?> excluirPeriodo(@RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime inicio, @RequestParam("fim") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime fim ) {
-        return ResponseEntity.ok().build();
-    
+    public ResponseEntity<?> excluirPeriodo(@RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime inicio, @RequestParam("fim") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime fim) {
+
+    boolean removido = transacaoService.excluirPeriodo(inicio, fim);
+
+    if (!removido) {
+        return ResponseEntity.noContent().build(); 
+    }
+
+    return ResponseEntity.ok().build(); 
     }
 }

@@ -40,8 +40,9 @@ public class TransacaoService {
                 .collect(Collectors.toList());
     }
 
-    public void excluirPeriodo(ZonedDateTime inicio, ZonedDateTime fim) {
-        transacoes.removeIf(t -> !t.getDataHora().isBefore(inicio) && !t.getDataHora().isAfter(fim));
+    public boolean excluirPeriodo(ZonedDateTime inicio, ZonedDateTime fim) {
+    
+        return transacoes.removeIf(t -> !t.getDataHora().isBefore(inicio) && !t.getDataHora().isAfter(fim));
     }
 
     
