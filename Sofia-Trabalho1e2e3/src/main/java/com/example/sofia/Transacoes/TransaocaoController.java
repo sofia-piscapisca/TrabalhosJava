@@ -4,6 +4,7 @@ import java.time.ZonedDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,15 +12,16 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/transacao")
-public class TransaocaoController  {
-    
-    @Autowired  
+public class TransaocaoController {
+
+    @Autowired
     private TransacaoService transacaoService;
-     
+
     @PostMapping
     public ResponseEntity<?> criarTransacao(@RequestBody Transacao transacao) {
         try {
@@ -43,7 +45,7 @@ public class TransaocaoController  {
         return ResponseEntity.ok(ultima);
     }
 
-       @DeleteMapping
+    @DeleteMapping
     public ResponseEntity<?> limparTransacoes() {
         transacaoService.limpar();
         return ResponseEntity.ok().build();
@@ -54,5 +56,18 @@ public class TransaocaoController  {
     public ResponseEntity<?> calcularEstatisca() {
         List<Transacao> results = transacaoService.ultimos60Segundos();
         return ResponseEntity.ok(results);
+    }
+
+    @PostMapping("/periodo")
+    public ResponseEntity<?> consultarPeriodo(@RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime inicio, @RequestParam("fim") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime fim ) {
+        List<Transacao> results = transacaoService.porPeriodo(inicio, fim);
+        return ResponseEntity.ok(results);
+
+    }
+
+    @DeleteMapping("/periodo")
+        public ResponseEntity<?> excluirPeriodo(@RequestParam("inicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime inicio, @RequestParam("fim") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) ZonedDateTime fim ) {
+        return ResponseEntity.ok().build();
+    
     }
 }
